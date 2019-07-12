@@ -12,6 +12,7 @@ function Square(props) {
   );
 }
 
+//ボードを作るクラス
 class Board extends React.Component {
   constructor() {
     super();
@@ -40,8 +41,14 @@ class Board extends React.Component {
   }
 
   render() {
-    const status = '次の手番: ' +
-      (this.state.xIsNext ? 'O' : 'X');
+    const winner = calculateWinner(this.state.squares);
+    let status;
+    if (winner) {
+      status = 'Winner: ' + winner;
+    } else {
+      status = '次の手番: ' +
+        (this.state.xIsNext ? 'O' : 'X');
+    }
 
     return (
       <div>
