@@ -2,6 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
+
+
+
 function Square(props) {
   return (
     <button
@@ -11,6 +14,9 @@ function Square(props) {
     </button>
   );
 }
+
+
+
 
 //ボードを作るクラス
 class Board extends React.Component {
@@ -23,25 +29,26 @@ class Board extends React.Component {
   render() {
     return (
       <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
+        {
+          Array(3).fill(0).map((row, i) => {
+            return (
+              <div className="board-row" key={i}>
+                {
+                  Array(3).fill(0).map((col, j) => {
+                    return (this.renderSquare(i * 3 + j))
+                  })
+                }
+              </div>
+            )
+          })
+        }
       </div>
     );
   }
 }
+
+
+
 
 class Game extends React.Component {
   constructor() {
@@ -51,7 +58,9 @@ class Game extends React.Component {
         squares: Array(9).fill(null)
       }],
       xIsNext: true,
-      stepNumber: 0
+      stepNumber: 0,
+      isAsc: true,
+      AscDsc: "昇順"
     };
   }
 
@@ -65,10 +74,12 @@ class Game extends React.Component {
     squares[i] = this.state.xIsNext ? 'O' : 'X';
     this.setState({
       history: history.concat([{
-        squares: squares
+        squares: squares,
+        col: (i % 3) + 1,
+        row: Math.floor(i / 3) + 1,
       }]),
       xIsNext: !this.state.xIsNext,
-      stepNumber: history.length
+      stepNumber: history.length,
     });
   }
 
@@ -77,6 +88,13 @@ class Game extends React.Component {
       stepNumber: step,
       xIsNext: (step % 2) ? false : true,
     })
+  }
+
+  toggleAsc() {
+    this.setState({
+      asc: !this.state.asc,
+      AscDsc: (this.state.asc ? "昇順" : "降順")
+    });
   }
 
   render() {
@@ -94,11 +112,13 @@ class Game extends React.Component {
 
     const moves = history.map((step, move) => {
       const desc = move ?
-        move + `番目の手に移動` :
+        move + `番目の手に移動  ` + step.col + '列目 ' + step.row + '行目に  ' + (move % 2 ? 'O' : 'X') :
         'ゲームスタート';
       return (
         <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
+          <button
+            className={this.state.stepNumber === move ? 'bold' : ''}
+            onClick={() => this.jumpTo(move)}>{desc}</button>
         </li>
       );
     });
@@ -113,14 +133,21 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ol>{moves}</ol>
+          <div>
+            <button onClick={() => this.toggleAsc()}>
+              {this.state.AscDsc}
+            </button>
+          </div>
+          <ol>{!this.state.asc ? moves : moves.reverse()}</ol>
         </div>
       </div>
     );
   }
 }
 
-// ========================================
+
+
+
 
 ReactDOM.render(
   <Game />,
